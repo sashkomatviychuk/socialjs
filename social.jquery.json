@@ -1,0 +1,27 @@
+{
+  "name": "social",
+  "title": "Social",
+  "description": "JQuery plugin with useful API to use with custom social buttons.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/ideil/socialjs",
+  "author": {
+    "name": "Ideil",
+    "email": "pm@ideil.com",
+    "url": "http://ideil.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ideil/socialjs.git"
+  },
+  "bugs": "https://github.com/ideil/socialjs/issues",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/ideil/socialjs/blob/master/LICENSE-MIT"
+    }
+  ],
+  "dependencies": {
+    "jquery": "1.8 or newer"
+  },
+  "keywords": []
+}
