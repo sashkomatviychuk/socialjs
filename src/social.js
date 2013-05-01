@@ -175,7 +175,7 @@
       }
     },
 
-    getCurrentCount: function () {
+    getCurrentShareCount: function () {
       return this.shareCount;
     }
   };

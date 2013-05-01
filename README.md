@@ -28,9 +28,9 @@ and this one takes url from data-href attribute
 Options:
 
 ```javascript
-{
+$('a[data-service]').social({
   fetchCountOnInit: false // to send a request on plugin init or nots
-}
+});
 ```
 
 Supported networks:
@@ -43,3 +43,34 @@ Supported networks:
   - LinkedIn
   - Mail.ru
   - Odnoklassniki.ru
+
+## How to use
+
+Initialize plugin
+
+```javascript
+$('a[data-service]').social();
+```
+
+Fetch share count with callback
+
+```javascript
+$('a[data-service]').social('fetchShareCount', function (count) {
+  console.log(count);
+});
+```
+
+Capture 'sharefetched' event
+
+```javascript
+$('a[data-service]').on('sharefetched', function (e, count) {
+  console.log(count);
+});
+$('a[data-service]').social('fetchShareCount');
+```
+
+Get count from element (already fetched)
+
+```javascript
+var count = $('a[data-service]').social('getCurrentShareCount');
+```
