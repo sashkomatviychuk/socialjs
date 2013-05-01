@@ -1,4 +1,4 @@
-/*! Social - v0.1.0 - 2013-04-30
+/*! Social - v0.1.0 - 2013-05-01
 * https://github.com/ideil/socialjs
 * Copyright (c) 2013 Ideil; Licensed MIT */
 ;(function ($, window, document, undefined) {
@@ -12,31 +12,30 @@
       countUrl: 'http://graph.facebook.com/?ids={{pageUrl}}'
     },
 
-    mailru: {
-      shareUrl: 'http://connect.mail.ru/share?url={{pageUrl}}',
-      countUrl: 'http://connect.mail.ru/share_count?callback=1&url_list={{pageUrl}}',
-      ajaxParams: {
-        jsonp: 'func'
+    twitter: {
+      shareUrl: 'https://twitter.com/intent/tweet?source=tweetbutton&text={{pageUrl}}',
+      countUrl: 'http://urls.api.twitter.com/1/urls/count.json?url={{pageUrl}}',
+      parseResponse : function (res) {
+        return res.count;
       }
     },
 
     vk: {
       shareUrl: 'http://vk.com/share.php?url={{pageUrl}}',
       countUrl: 'http://vk.com/share.php?act=count&format=json&index=0&url={{pageUrl}}',
-      preParse: function (obj) {
+      preParse: function (obj, cb) {
         window.VK = window.VK || {};
         window.VK.Share = window.VK.Share || {};
         window.VK.Share.count = function (index, count) {
           obj.shareCount = count;
-        };
-      }
-    },
+          obj.$el.trigger('sharefetched', obj.shareCount);
 
-    twitter: {
-      shareUrl: 'https://twitter.com/intent/tweet?source=tweetbutton&text={{pageUrl}}',
-      countUrl: 'http://urls.api.twitter.com/1/urls/count.json?url={{pageUrl}}',
-      parseResponse : function (res) {
-        return res.count;
+          if (typeof cb === 'function') {
+            cb(obj.shareCount);
+          }
+
+          return obj.shareCount;
+        };
       }
     },
 
@@ -48,7 +47,7 @@
       }
     },
 
-    linkedIn: {
+    linkedin: {
       shareUrl: 'http://www.linkedin.com/sharer.php?u={{pageUrl}}',
       countUrl: 'http://www.linkedin.com/countserv/count/share?url={{pageUrl}}&format=jsonp',
       parseResponse : function (res) {
@@ -56,14 +55,29 @@
       }
     },
 
+    mailru: {
+      shareUrl: 'http://connect.mail.ru/share?url={{pageUrl}}',
+      countUrl: 'http://connect.mail.ru/share_count?callback=1&url_list={{pageUrl}}',
+      ajaxParams: {
+        jsonp: 'func'
+      }
+    },
+
     odnoklassniki: {
       shareUrl: 'http://www.odnoklassniki.ru/dk?st.cmd=addShare&st._surl={{pageUrl}}',
       countUrl: 'http://www.odnoklassniki.ru/dk?st.cmd=extLike&ref={{pageUrl}}',
-      preParse: function (obj) {
+      preParse: function (obj, cb) {
         window.ODKL = window.ODKL || {};
 
         window.ODKL.updateCount = function (index, count) {
           obj.shareCount = parseInt(count, 10);
+          obj.$el.trigger('sharefetched', obj.shareCount);
+
+          if (typeof cb === 'function') {
+            cb(obj.shareCount);
+          }
+
+          return obj.shareCount;
         };
       }
     }
@@ -117,15 +131,24 @@
       this.$el.attr('href', this.shareLink);
     },
 
-    fetchShareCount: function () {
+    fetchShareCount: function (cb) {
       if (services[this.service].preParse) {
-        services[this.service].preParse(this);
+        services[this.service].preParse(this, cb);
       }
-      this.fetchDeferredCount().success(this.parseCount);
+
+      this.fetchDeferredCount().success(function (res) {
+        this.parseCount(res);
+
+        this.$el.trigger('sharefetched', this.shareCount);
+
+        if (typeof cb === 'function') {
+          cb(this.shareCount);
+        }
+      });
     },
 
     fetchDeferredCount: function () {
-      return $.ajax($.extend(true, ajaxDefaults, services[this.service].ajaxParams, {
+      return $.ajax($.extend(true, {}, ajaxDefaults, services[this.service].ajaxParams, {
         url: this.countLink,
         context: this
       }));
@@ -138,7 +161,11 @@
         self.shareCount = services[self.service].parseResponse(res);
       } else {
         $.each(res, function (i, url) {
-          self.shareCount = url.shares;
+          if (typeof url.shares !== 'undefined') {
+            self.shareCount = url.shares;
+          } else {
+            self.shareCount = 0;
+          }
         });
       }
     },
@@ -150,26 +177,30 @@
 
   // A really lightweight plugin wrapper around the constructor,
   // preventing against multiple instantiations
-  $.fn[pluginName] = function (options) {
+  $.fn[pluginName] = function (options, cb) {
     var thisChained = this;
     var elements = this.length;
+
+    cb = cb || false;
 
     this.each(function (i) {
       var self = $.data(this, 'plugin_' + pluginName);
       if (!self) {
         $.data(this, 'plugin_' + pluginName, new Plugin(this, options));
       } else if (typeof self[options] === 'function') {
+        // if starts with 'get' then we don't chain and return a value
         if (options.indexOf('get') === 0) {
           if (elements > 1) {
             if (i === 0) {
               thisChained = {};
             }
-            thisChained[self.service] = self[options]();
+            thisChained[self.service] = self[options](cb);
           } else {
-            thisChained = self[options]();
+            thisChained = self[options](cb);
           }
         }
-        self[options]();
+
+        self[options](cb);
       }
     });
 
