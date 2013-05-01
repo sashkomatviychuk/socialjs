@@ -1,4 +1,4 @@
-# Social
+# Social [![Build Status](https://travis-ci.org/ideil/socialjs.png)](https://travis-ci.org/ideil/socialjs)
 
 JQuery plugin with useful API to use with custom social buttons.
 
@@ -19,12 +19,3 @@ jQuery(function($) {
 });
 </script>
 ```
-
-## Documentation
-_(Coming soon)_
-
-## Examples
-_(Coming soon)_
-
-## Release History
-_(Nothing yet)_
