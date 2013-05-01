@@ -1,4 +1,4 @@
-/*! Social - v0.1.0 - 2013-05-01
+/*! Social - v0.1.0 - 2013-05-02
 * https://github.com/ideil/socialjs
 * Copyright (c) 2013 Ideil; Licensed MIT */
 ;(function ($, window, document, undefined) {
@@ -170,7 +170,7 @@
       }
     },
 
-    getCurrentCount: function () {
+    getCurrentShareCount: function () {
       return this.shareCount;
     }
   };
