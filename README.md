@@ -29,7 +29,7 @@ Options:
 
 ```javascript
 $('a[data-service]').social({
-  fetchCountOnInit: false // to send a request on plugin init or nots
+  fetchCountOnInit: false // to send a request on plugin init or not
 });
 ```
 
